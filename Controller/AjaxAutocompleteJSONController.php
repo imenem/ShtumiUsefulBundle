@@ -15,7 +15,6 @@ class AjaxAutocompleteJSONController extends Controller
 
     public function getJSONAction()
     {
-
         $em = $this->get('doctrine')->getEntityManager();
         $request = $this->getRequest();
 
@@ -35,24 +34,33 @@ class AjaxAutocompleteJSONController extends Controller
 
         switch ($type){
             case "begins_with":
-                $like = $letters . '%';
+                $operator   = 'LIKE';
+                $parameter  = "{$letters}%";
             break;
             case "ends_with":
-                $like = '%' . $letters;
+                $operator   = 'LIKE';
+                $parameter  = "%{$letters}";
             break;
             case "contains":
-                $like = '%' . $letters . '%';
+                $operator   = 'LIKE';
+                $parameter  = "%{$letters}%";
+            break;
+            case "equals":
+                $operator   = '=';
+                $parameter  = $letters;
             break;
             default:
                 throw new \Exception('Unexpected value of parameter "search"');
         }
 
-        $results = $em->createQuery(
-            'SELECT e.' . $entity_inf['property'] . '
-             FROM ' . $entity_inf['class'] . ' e
-             WHERE e.' . $entity_inf['property'] . ' LIKE :like
-             ORDER BY e.' . $entity_inf['property'])
-            ->setParameter('like', $like )
+        $results = $em->createQuery
+            (
+                "SELECT   e.{$entity_inf['property']}
+                 FROM       {$entity_inf['class']}                          e
+                 WHERE    e.{$entity_inf['property']}       {$operator}     :parameter
+                 ORDER BY e.{$entity_inf['property']}"
+             )
+            ->setParameter('parameter', $parameter )
             ->setMaxResults($maxRows)
             ->getScalarResult();
 

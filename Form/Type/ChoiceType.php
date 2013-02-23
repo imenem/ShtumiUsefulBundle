@@ -16,6 +16,7 @@ class ChoiceType extends BaseChoiceType
     const TYPE_BEGINS_WITH  = 'begins_with';
     const TYPE_ENDS_WITH    = 'ends_with';
     const TYPE_CONTAINS     = 'contains';
+    const TYPE_IS_EQUAL     = 'equals';
 
     protected $translator;
 
@@ -40,7 +41,8 @@ class ChoiceType extends BaseChoiceType
             (
                 self::TYPE_BEGINS_WITH  => $this->translator->trans('label_type_begins_with',   array(), 'SonataAdminBundle'),
                 self::TYPE_ENDS_WITH    => $this->translator->trans('label_type_ends_with',     array(), 'SonataAdminBundle'),
-                self::TYPE_CONTAINS     => $this->translator->trans('label_type_contains',      array(), 'SonataAdminBundle')
+                self::TYPE_CONTAINS     => $this->translator->trans('label_type_contains',      array(), 'SonataAdminBundle'),
+                self::TYPE_IS_EQUAL     => $this->translator->trans('label_type_equals',         array(), 'SonataAdminBundle')
             )
         ));
     }
