@@ -88,18 +88,17 @@ class AjaxAutocompleteFilter extends Filter
             throw new \RunTimeException('please provide a field_name options');
         }
 
-        if (!$this->getOption('callback')){
+        if (!$this->getOption('callback'))
+        {
+            $name  = $this->getFieldName();
+            $alias = $queryBuilder->entityJoin(array(array('fieldName' => $name)));
 
-            $alias = 's_'.$this->getName();
-            $queryBuilder->leftJoin(sprintf('%s.%s', $queryBuilder->getRootAlias(), $this->getFieldName()), $alias);
-            return array($alias, 'id');
-
-        } else {
-
+            return array($alias, $name);
+        }
+        else
+        {
             return array($this->getOption('alias', $queryBuilder->getRootAlias()), false);
-
-        };
-
+        }
     }
 
     public function getDefaultOptions()
