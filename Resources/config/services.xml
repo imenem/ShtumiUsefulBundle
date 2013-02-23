@@ -26,6 +26,10 @@
             <argument>%shtumi.date_range%</argument>
         </service>
 
+        <service id="shtumi.useful.type.equal" class="Shtumi\UsefulBundle\Form\Type\ChoiceType">
+            <tag name="form.type" alias="shtumi_type_choice" />
+            <argument type="service" id="translator" />
+        </service>
 
         <service id="shtumi.useful.orm.filter.type.ajax_autocomplete" class="Shtumi\UsefulBundle\Filter\AjaxAutocompleteFilter">
             <argument type="service" id="service_container"/>

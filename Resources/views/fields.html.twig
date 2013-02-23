@@ -1,5 +1,8 @@
 {% block shtumi_ajax_autocomplete_widget %}
 
+    {% set type_id  =  form.parent.children.type.vars.id %}
+    {% set value_id =  form.vars.id %}
+
     <script type="text/javascript">
         if (typeof jQuery.ui == 'undefined'){
             $.getScript('{{ asset('/bundles/shtumiuseful/js/jqueryui/jquery-ui-1.8.18.custom.min.js') }}');
@@ -9,15 +12,15 @@
 
     <script>
         $(function() {
-
-            $( "#{{ form.getVars().id }}"  ).autocomplete({
+            $("#{{ value_id }}").autocomplete({
                 source: function( request, response ) {
                     $.ajax({
                         url: "{{ path('shtumi_ajaxautocomplete') }}",
                         dataType: "json",
                         data: {
                             maxRows: 12,
-                            letters: request.term,
+                            letters: $("#{{ value_id }}").val(),
+                            type: $("#{{ type_id }}").val(),
                             entity_alias: "{{ entity_alias }}"
                         },
                         success: function( data ) {
@@ -32,13 +35,17 @@
                 },
                 minLength: 2,
                 open: function() {
-                    $( this ).removeClass( "ui-corner-all" ).addClass( "ui-corner-top" );
+                    $(this).removeClass( "ui-corner-all" ).addClass( "ui-corner-top" );
                 },
                 close: function() {
-                    $( this ).removeClass( "ui-corner-top" ).addClass( "ui-corner-all" );
+                    $(this).removeClass( "ui-corner-top" ).addClass( "ui-corner-all" );
                 }
             });
 
+            $("#{{ type_id }}").change(function()
+            {
+                $("#{{ value_id }}").autocomplete( "search");
+            });
         });
     </script>
 

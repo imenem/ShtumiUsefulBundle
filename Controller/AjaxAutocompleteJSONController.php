@@ -31,7 +31,9 @@ class AjaxAutocompleteJSONController extends Controller
         $letters = $request->get('letters');
         $maxRows = $request->get('maxRows');
 
-        switch ($entity_inf['search']){
+        $type = $request->query->get('type', $entity_inf['search']);
+
+        switch ($type){
             case "begins_with":
                 $like = $letters . '%';
             break;
