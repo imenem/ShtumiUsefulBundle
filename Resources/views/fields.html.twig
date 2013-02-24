@@ -118,23 +118,54 @@
 
 
 {% block shtumi_daterange_widget %}
-
-    <style type="text/css">@import "{{ asset('bundles/shtumiuseful/js/datepicker/jquery.datepick.css') }}";</style>
-    <style type="text/css">@import "{{ asset('bundles/shtumiuseful/css/daterange.css') }}";</style>
-    <script type="text/javascript" src="{{ asset('bundles/shtumiuseful/js/datepicker/jquery.datepick.js') }}"></script>
-    <script type="text/javascript" src="{{ asset('bundles/shtumiuseful/js/datepicker/jquery.datepick-' ~ locale[0:2] ~ '.js') }}"></script>
+    <style type="text/css">@import "{{ asset('bundles/shtumiuseful/js/daterangepicker/daterangepicker.css') }}";</style>
+    <script type="text/javascript" src="{{ asset('bundles/shtumiuseful/js/daterangepicker/daterangepicker.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('bundles/shtumiuseful/js/daterangepicker/date.js') }}"></script>
 
     <script>
-        $(function(){
-            $('input#{{ form.getVars().id }}').datepick({
-                rangeSelect: true, monthsToShow: 2, showTrigger: '#calImg', dateFormat: '{{ datepicker_date_format }}' });
+        $(function()
+        {
+            $('input#{{ form.vars.id }}').daterangepicker(
+            {
+                opens: 'left',
+                format: '{{ form.vars.datepicker_date_format }}',
+                maxDate: Date.today(),
+                locale:
+                {
+                    applyLabel: '{{ 'daterangepicker.label.apply'|trans({}, 'DateRangePicker') }}',
+                    fromLabel: '{{ 'daterangepicker.label.from'|trans({}, 'DateRangePicker') }}',
+                    toLabel: '{{ 'daterangepicker.label.to'|trans({}, 'DateRangePicker') }}',
+                    customRangeLabel: '{{ 'daterangepicker.label.custom_range'|trans({}, 'DateRangePicker') }}',
+                    daysOfWeek:
+                    [
+                        '{{ 'daterangepicker.day.sunday'|trans({}, 'DateRangePicker') }}',
+                        '{{ 'daterangepicker.day.monday'|trans({}, 'DateRangePicker') }}',
+                        '{{ 'daterangepicker.day.tuesday'|trans({}, 'DateRangePicker') }}',
+                        '{{ 'daterangepicker.day.wednesday'|trans({}, 'DateRangePicker') }}',
+                        '{{ 'daterangepicker.day.thursday'|trans({}, 'DateRangePicker') }}',
+                        '{{ 'daterangepicker.day.friday'|trans({}, 'DateRangePicker') }}',
+                        '{{ 'daterangepicker.day.saturday'|trans({}, 'DateRangePicker') }}',
+                    ],
+                    monthNames:
+                    [
+                        '{{ 'daterangepicker.month.january'|trans({}, 'DateRangePicker') }}',
+                        '{{ 'daterangepicker.month.february'|trans({}, 'DateRangePicker') }}',
+                        '{{ 'daterangepicker.month.march'|trans({}, 'DateRangePicker') }}',
+                        '{{ 'daterangepicker.month.april'|trans({}, 'DateRangePicker') }}',
+                        '{{ 'daterangepicker.month.may'|trans({}, 'DateRangePicker') }}',
+                        '{{ 'daterangepicker.month.june'|trans({}, 'DateRangePicker') }}',
+                        '{{ 'daterangepicker.month.july'|trans({}, 'DateRangePicker') }}',
+                        '{{ 'daterangepicker.month.august'|trans({}, 'DateRangePicker') }}',
+                        '{{ 'daterangepicker.month.september'|trans({}, 'DateRangePicker') }}',
+                        '{{ 'daterangepicker.month.october'|trans({}, 'DateRangePicker') }}',
+                        '{{ 'daterangepicker.month.november'|trans({}, 'DateRangePicker') }}',
+                        '{{ 'daterangepicker.month.december'|trans({}, 'DateRangePicker') }}'
+                    ],
+                    firstDay: 1
+                },
+            });
         })
     </script>
 
-    <input {{ block('widget_attributes') }} value="{{ value }}" class="shtumi-daterange">
-
-    <div style="display: none;">
-        <img id="calImg" src="{{ asset('bundles/shtumiuseful/js/datepicker/calendar-green.gif') }}" alt="Popup" class="trigger" height='22' align='absmiddle' style='margin-left: 10px;'>
-    </div>
-
+    <input {{ block('widget_attributes') }} value="{{ value }}">
 {% endblock %}
