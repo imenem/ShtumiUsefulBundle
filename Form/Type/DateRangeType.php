@@ -22,13 +22,15 @@ class DateRangeType extends AbstractType
 {
     private $date_format;
     private $default_interval;
+    private $daterange_separator;
     private $container;
 
     public function __construct($container, $parameters)
     {
-        $this->date_format      = $parameters['date_format'];
-        $this->default_interval = $parameters['default_interval'];
-        $this->container        = $container;
+        $this->date_format          = $parameters['date_format'];
+        $this->default_interval     = $parameters['default_interval'];
+        $this->daterange_separator  = $parameters['daterange_separator'];
+        $this->container            = $container;
     }
 
     public function setDefaultOptions(OptionsResolverInterface $resolver)
@@ -82,11 +84,13 @@ class DateRangeType extends AbstractType
         $datepicker_format = str_replace($searches, $replaces, $this->date_format);
 
         $builder->setAttribute('datepicker_date_format', $datepicker_format);
+        $builder->setAttribute('datepicker_daterange_separator', $this->daterange_separator);
     }
 
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
         $view->set('datepicker_date_format', $form->getAttribute('datepicker_date_format'));
+        $view->set('datepicker_daterange_separator', $form->getAttribute('datepicker_daterange_separator'));
         $view->set('locale', $this->container->get('request')->getLocale());
 
     }
