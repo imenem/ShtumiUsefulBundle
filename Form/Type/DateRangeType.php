@@ -34,8 +34,9 @@ class DateRangeType extends AbstractType
     public function setDefaultOptions(OptionsResolverInterface $resolver)
     {
         $resolver->setDefaults(array(
-            'default' => null,
-            'compound' => false,
+            'field_options' => array(),
+            'default'       => null,
+            'compound'      => false,
         ));
     }
 
@@ -76,7 +77,7 @@ class DateRangeType extends AbstractType
 
         // Datepicker date format
         $searches = array('d', 'm', 'y', 'Y');
-        $replaces = array('dd', 'mm', 'yy', 'yyyy');
+        $replaces = array('dd', 'MM', 'yy', 'yyyy');
 
         $datepicker_format = str_replace($searches, $replaces, $this->date_format);
 
