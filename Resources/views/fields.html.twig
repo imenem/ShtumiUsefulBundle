@@ -1,6 +1,8 @@
 {% block shtumi_ajax_autocomplete_widget %}
+    {% if form.parent.children.type is defined %}
+        {% set type_id  =  form.parent.children.type.vars.id %}
+    {% endif %}
 
-    {% set type_id  =  form.parent.children.type.vars.id %}
     {% set value_id =  form.vars.id %}
 
     <script type="text/javascript">
@@ -20,7 +22,9 @@
                         data: {
                             maxRows: 12,
                             letters: $("#{{ value_id }}").val(),
+                        {% if type_id is defined %}
                             type: $("#{{ type_id }}").val(),
+                        {% endif %}
                             entity_alias: "{{ entity_alias }}"
                         },
                         success: function( data ) {
@@ -42,10 +46,12 @@
                 }
             });
 
+        {% if type_id is defined %}
             $("#{{ type_id }}").change(function()
             {
                 $("#{{ value_id }}").autocomplete( "search");
             });
+        {% endif %}
         });
     </script>
 
