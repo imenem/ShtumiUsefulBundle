@@ -18,6 +18,14 @@ class DependentFilteredEntityController extends Controller
     protected $class;
 
     /**
+     * Массив с описанием свойств для фильтрации
+     * вида [<имя поля формы> => <полный путь свойства>]
+     *
+     * @var array
+     */
+    protected $depends_from;
+
+    /**
      * Свойство и направление для сортировки.
      * - property - имя свойства
      * - direction - направление
@@ -62,18 +70,19 @@ class DependentFilteredEntityController extends Controller
     protected $filter_factory;
 
     /**
-     * Описание фильтра
+     * Текст для тега <select>, когда не выбрана сущность,
+     * по которой нужно отфильтровать список
      *
-     * @var array
+     * @var string
      */
-    protected $entity_info;
+    protected $empty_value;
 
     /**
-     * Данные для фильтрации переданные с клиента
+     * Текст для тега <select>, когда список пуст после фильтрации
      *
-     * @var array
+     * @var string
      */
-    protected $request_info;
+    protected $no_result;
 
     /**
      * Метод производит фильтрацию списка сущности по ее свойствам
@@ -83,7 +92,12 @@ class DependentFilteredEntityController extends Controller
     public function getOptionsAction()
     {
         $this->configure();
-        $this->applyFilter($this->entity_info['parent_property'], $this->request_info['parent_id']);
+
+        foreach ($this->depends_from as $field => $property)
+        {
+            $this->applyFilter($property, $this->request->get($field));
+        }
+
         $this->applyCallback();
         $this->applyOrderBy();
 
@@ -91,21 +105,21 @@ class DependentFilteredEntityController extends Controller
 
         if (empty($results))
         {
-            return new Response('<option value="">' . $this->translator->trans($this->entity_info['no_result_msg']) . '</option>');
+            return new Response('<option value="">' . $this->translator->trans($this->no_result) . '</option>');
         }
 
         $html = '';
 
-        if ($this->request_info['empty_value'])
+        if ($this->empty_value)
         {
-            $html .= '<option value="">' . $this->translator->trans($this->request_info['empty_value']) . '</option>';
+            $html .= '<option value="">' . $this->translator->trans($this->empty_value) . '</option>';
         }
 
         foreach($results as $result)
         {
-            if ($this->entity_info['property'])
+            if ($this->property)
             {
-                $res = $this->property_accessor->getValue($result, $this->entity_info['property']);
+                $res = $this->property_accessor->getValue($result, $this->property);
             }
             else
             {
@@ -125,19 +139,19 @@ class DependentFilteredEntityController extends Controller
      */
     protected function configure()
     {
-        $this->request      = $this->getRequest();
+        $this->request  = $this->getRequest();
 
-        $entities           = $this->get('service_container')->getParameter('shtumi.dependent_filtered_entities');
-        $entity_alias       = $this->request->get('entity_alias');
+        $entities       = $this->get('service_container')->getParameter('shtumi.dependent_filtered_entities');
+        $entity_alias   = $this->request->get('entity_alias');
 
-        $this->entity_info  = $entities[$entity_alias];
+        $entity_info    = $entities[$entity_alias];
 
-        if (!$this->get('security.context')->isGranted($this->entity_info['role']))
+        if (!$this->get('security.context')->isGranted($entity_info['role']))
         {
             throw new AccessDeniedException();
         }
 
-        $this->class                = $this->entity_info['class'];
+        $this->class                = $entity_info['class'];
         $this->model_manager        = $this->get('sonata.admin.manager.orm');
         $this->type_guesser         = $this->get('sonata.admin.guesser.orm_datagrid');
         $this->filter_factory       = $this->get('sonata.admin.builder.filter.factory');
@@ -145,13 +159,14 @@ class DependentFilteredEntityController extends Controller
         $this->translator           = $this->get('translator');
         $this->query_builder        = $this->model_manager->createQuery($this->class);
 
-        $this->order_by['property']     = $this->entity_info['order_property'];
-        $this->order_by['direction']    = $this->entity_info['order_direction'];
+        $this->callback     = $entity_info['callback'];
+        $this->depends_from = $entity_info['depends_from'];
+        $this->property     = $entity_info['property'];
+        $this->no_result    = $entity_info['no_result_msg'];
+        $this->empty_value  = $this->request->get('empty_value');
 
-        $this->callback                 = $this->entity_info['callback'];
-
-        $this->request_info['parent_id']    = $this->request->get('parent_id');
-        $this->request_info['empty_value']  = $this->request->get('empty_value');
+        $this->order_by['property']     = $entity_info['order_property'];
+        $this->order_by['direction']    = $entity_info['order_direction'];
     }
 
     /**

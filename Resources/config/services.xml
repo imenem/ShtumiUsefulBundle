@@ -17,7 +17,8 @@
 
         <service id="shtumi.useful.type.dependent_filtered_entity" class="Shtumi\UsefulBundle\Form\Type\DependentFilteredEntityType">
             <tag name="form.type" alias="shtumi_dependent_filtered_entity"/>
-            <argument type="service" id="service_container"/>
+            <argument type="service" id="doctrine.orm.entity_manager"/>
+            <argument>%shtumi.dependent_filtered_entities%</argument>
         </service>
 
         <service id="shtumi.useful.type.daterange" class="Shtumi\UsefulBundle\Form\Type\DateRangeType">

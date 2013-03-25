@@ -80,43 +80,94 @@
 
 {% block shtumi_dependent_filtered_entity_widget %}
 
+    {% set select_id = form.vars.id %}
+
     <select {{ block('widget_attributes') }}></select>
 
-    <img src='{{ asset('bundles/shtumiuseful/images/ajax-loader.gif' ) }}' id='loader' style='display: none;'>
-    <script type="text/javascript">
-        $(document).ready(function(){
+    <img src='{{ asset('bundles/shtumiuseful/images/ajax-loader.gif' ) }}' id='loader' style='display: none;' />
 
-            $("select#{{ form.parent.getChild( parent_field ).getVars().id }}").change( function() {
-                var selected_index = {{ value ? value : 0 }};
-                $("#loader").show();
-                $.ajax({
-                    type: "POST",
-                    data: {
-                        parent_id: $(this).val(),
-                        entity_alias: "{{ entity_alias }}",
-                        empty_value: "{{ empty_value }}"
-                    },
-                    url:"{{ path('shtumi_dependent_filtered_entity') }}",
-                    success: function(msg){
-                        if (msg != ''){
-                            $("select#{{ form.getVars().id }}").html(msg).show();
-                            $.each($("select#{{ form.getVars().id }} option"), function (index, option){
-                                if ($(option).val() == selected_index)
-                                    $(option).attr('selected', 'selected');
-                            })
-                            $("select#{{ form.getVars().id }}").trigger('change');
-                            $("#loader").hide();
-                        } else {
-                            $("select#{{ form.getVars().id }}").html('<em>{{ no_result_msg|trans() }}</em>');
-                            $("#loader").hide();
+    <script type="text/javascript">
+        $(document).ready(function()
+        {
+            var parent_select,
+                parent_select_list = {};
+
+        {% for field, property in depends_from %}
+            {% set parent_select_id = form.parent.getChild(field).vars.id %}
+
+            parent_select_list['{{ field }}'] = $("select#{{ parent_select_id }}");
+        {% endfor %}
+
+            var selected        = '{{ value ? value : 0 }}'|0,
+                select          = $('select#{{ select_id }}'),
+                loader          = $('#loader'),
+                values          =
+                {
+                    'entity_alias': '{{ entity_alias }}',
+                    'empty_value':  '{{ empty_value }}'
+                },
+                get_values      = function()
+                {
+                    for (parent_select in parent_select_list)
+                    {
+                        if (!parent_select_list.hasOwnProperty(parent_select))
+                        {
+                            continue;
                         }
-                    },
-                    error: function(xhr, ajaxOptions, thrownError){
-                    $('html').html(xhr.responseText);
+
+                        values[parent_select] = parent_select_list[parent_select].val();
                     }
-                });
-            });
-            $("select#{{ form.parent.getChild( parent_field ).getVars().id }}").trigger('change');
+
+                    return values;
+                },
+                filter          = function()
+                {
+                    loader.show();
+
+                    $.ajax(
+                    {
+                        type: "POST",
+                        data: get_values(),
+                        url:"{{ path('shtumi_dependent_filtered_entity') }}",
+                        success: function(msg)
+                        {
+                            if (msg.length > 0)
+                            {
+                                select.html(msg).show();
+
+                                select.find('option').each(function()
+                                {
+                                    if ($(this).val() == selected)
+                                    {
+                                        $(this).attr('selected', 'selected');
+                                    }
+                                });
+                            }
+                            else
+                            {
+                                select.html('<em>{{ no_result_msg|trans }}</em>');
+                            }
+
+                            loader.hide();
+                        },
+                        error: function(xhr, ajaxOptions, thrownError)
+                        {
+                            $('html').html(xhr.responseText);
+                        }
+                    });
+                };
+
+                for (parent_select in parent_select_list)
+                {
+                    if (!parent_select_list.hasOwnProperty(parent_select))
+                    {
+                        continue;
+                    }
+
+                    parent_select_list[parent_select].change(filter);
+                }
+
+                filter();
         });
     </script>
 
@@ -124,7 +175,7 @@
 
 
 {% block shtumi_daterange_widget %}
-    <style type="text/css">@import "{{ asset('bundles/shtumiuseful/js/daterangepicker/daterangepicker.css') }}";</style>
+    <link href="{{ asset('bundles/shtumiuseful/js/daterangepicker/daterangepicker.css') }}" type="text/css" rel="stylesheet" media="screen" />
     <script type="text/javascript" src="{{ asset('bundles/shtumiuseful/js/daterangepicker/daterangepicker.js') }}"></script>
     <script type="text/javascript" src="{{ asset('bundles/shtumiuseful/js/daterangepicker/date.js') }}"></script>
 
