@@ -6,7 +6,7 @@
     {% set value_id =  form.vars.id %}
 
     <script type="text/javascript">
-        if (typeof jQuery.ui == 'undefined'){
+        if (typeof jQuery.ui === 'undefined'){
             $.getScript('{{ asset('/bundles/shtumiuseful/js/jqueryui/jquery-ui-1.8.18.custom.min.js') }}');
         }
 
@@ -32,7 +32,7 @@
                                 return {
                                     label: item,
                                     value: item
-                                }
+                                };
                             }));
                         }
                     });
@@ -84,51 +84,58 @@
 
     <select {{ block('widget_attributes') }}></select>
 
-    <img src='{{ asset('bundles/shtumiuseful/images/ajax-loader.gif' ) }}' id='loader' style='display: none;' />
+    <img src="{{ asset('bundles/shtumiuseful/images/ajax-loader.gif' ) }}" id="{{ select_id }}_loader" class="hide" />
 
     <script type="text/javascript">
         $(document).ready(function()
         {
-            var parent_select,
-                parent_select_list = {};
+            var parent_list = {};
 
         {% for field, property in depends_from %}
-            {% set parent_select_id = form.parent.getChild(field).vars.id %}
+            {% set parent_id = form.parent.getChild(field).vars.id %}
 
-            parent_select_list['{{ field }}'] = $("select#{{ parent_select_id }}");
+            parent_list['{{ field }}'] = $('#{{ parent_id }}');
         {% endfor %}
 
             var selected        = '{{ value ? value : 0 }}'|0,
-                select          = $('select#{{ select_id }}'),
-                loader          = $('#loader'),
+                select          = $('#{{ select_id }}'),
+                loader          = $('#{{ select_id }}_loader'),
                 values          =
                 {
                     'entity_alias': '{{ entity_alias }}',
                     'empty_value':  '{{ empty_value }}'
                 },
-                get_values      = function()
+                update_values   = function()
                 {
-                    for (parent_select in parent_select_list)
+                    $.each(parent_list, function(field, parent)
                     {
-                        if (!parent_select_list.hasOwnProperty(parent_select))
+                        if (parent.hasClass('loading'))
                         {
-                            continue;
+                            throw 'Parent input still loading';
                         }
 
-                        values[parent_select] = parent_select_list[parent_select].val();
-                    }
-
-                    return values;
+                        values[field] = parent.val();
+                    });
                 },
                 filter          = function()
                 {
+                    try
+                    {
+                        update_values();
+                    }
+                    catch(e)
+                    {
+                        return;
+                    }
+
                     loader.show();
+                    select.addClass('loading');
 
                     $.ajax(
                     {
-                        type: "POST",
-                        data: get_values(),
-                        url:"{{ path('shtumi_dependent_filtered_entity') }}",
+                        type: 'POST',
+                        data: values,
+                        url: '{{ path('shtumi_dependent_filtered_entity') }}',
                         success: function(msg)
                         {
                             if (msg.length > 0)
@@ -137,11 +144,12 @@
 
                                 select.find('option').each(function()
                                 {
-                                    if ($(this).val() == selected)
+                                    if ($(this).val()|0 === selected)
                                     {
                                         $(this).attr('selected', 'selected');
                                     }
                                 });
+
                             }
                             else
                             {
@@ -149,6 +157,8 @@
                             }
 
                             loader.hide();
+                            select.removeClass('loading');
+                            select.trigger('change');
                         },
                         error: function(xhr, ajaxOptions, thrownError)
                         {
@@ -157,15 +167,10 @@
                     });
                 };
 
-                for (parent_select in parent_select_list)
+                $.each(parent_list, function(field, parent)
                 {
-                    if (!parent_select_list.hasOwnProperty(parent_select))
-                    {
-                        continue;
-                    }
-
-                    parent_select_list[parent_select].change(filter);
-                }
+                    parent.change(filter);
+                });
 
                 filter();
         });
@@ -202,7 +207,7 @@
                         '{{ 'daterangepicker.day.wednesday'|trans({}, 'DateRangePicker') }}',
                         '{{ 'daterangepicker.day.thursday'|trans({}, 'DateRangePicker') }}',
                         '{{ 'daterangepicker.day.friday'|trans({}, 'DateRangePicker') }}',
-                        '{{ 'daterangepicker.day.saturday'|trans({}, 'DateRangePicker') }}',
+                        '{{ 'daterangepicker.day.saturday'|trans({}, 'DateRangePicker') }}'
                     ],
                     monthNames:
                     [
@@ -220,9 +225,9 @@
                         '{{ 'daterangepicker.month.december'|trans({}, 'DateRangePicker') }}'
                     ],
                     firstDay: 1
-                },
+                }
             });
-        })
+        });
     </script>
 
     <input {{ block('widget_attributes') }} value="{{ value }}">
