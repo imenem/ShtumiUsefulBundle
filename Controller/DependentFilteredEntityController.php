@@ -126,7 +126,7 @@ class DependentFilteredEntityController extends Controller
                 $res = (string) $result;
             }
 
-            $html = $html . sprintf("<option value=\"%d\">%s</option>",$result->getId(), $res);
+            $html = $html . sprintf("<option value=\"%d\">%s</option>", $result->getId(), $res);
         }
 
         return new Response($html);
@@ -179,7 +179,7 @@ class DependentFilteredEntityController extends Controller
     {
         $field_name = substr(strrchr(".{$property}", '.'), 1);
         $field_desc = $this->model_manager
-                           ->getNewFieldDescriptionInstance($this->class, $property, ['field_name' => $field_name]);
+                           ->getNewFieldDescriptionInstance($this->class, $property, array('field_name' => $field_name));
 
         $this->applyType($field_desc);
         $this->applyMetadata($field_desc);
