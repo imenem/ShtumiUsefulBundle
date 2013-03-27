@@ -2,28 +2,22 @@
 
 namespace Shtumi\UsefulBundle\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
-
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
-
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller,
+    Symfony\Component\Security\Core\Exception\AccessDeniedException,
+    Symfony\Component\HttpFoundation\Response;
 
 class AjaxAutocompleteJSONController extends Controller
 {
-
     public function getJSONAction()
     {
-        $em = $this->get('doctrine')->getEntityManager();
-        $request = $this->getRequest();
+        $em             = $this->get('doctrine')->getEntityManager();
+        $request        = $this->getRequest();
+        $entities       = $this->get('service_container')->getParameter('shtumi.autocomplete_entities');
+        $entity_alias   = $request->get('entity_alias');
+        $entity_inf     = $entities[$entity_alias];
 
-        $entities = $this->get('service_container')->getParameter('shtumi.autocomplete_entities');
-
-        $entity_alias = $request->get('entity_alias');
-        $entity_inf = $entities[$entity_alias];
-
-        if (false === $this->get('security.context')->isGranted( $entity_inf['role'] )) {
+        if (false === $this->get('security.context')->isGranted( $entity_inf['role'] ))
+        {
             throw new AccessDeniedException();
         }
 
@@ -53,23 +47,34 @@ class AjaxAutocompleteJSONController extends Controller
                 throw new \Exception('Unexpected value of parameter "search"');
         }
 
+        if ($entity_inf['case_insensitive'])
+        {
+            $where = "WHERE   LOWER(e.{$entity_inf['property']})      {$operator}     LOWER(:parameter)";
+        }
+        else
+        {
+            $where = "WHERE         e.{$entity_inf['property']}       {$operator}           :parameter";
+        }
+
         $results = $em->createQuery
             (
                 "SELECT   e.{$entity_inf['property']}
-                 FROM       {$entity_inf['class']}                          e
-                 WHERE    e.{$entity_inf['property']}       {$operator}     :parameter
+                 FROM       {$entity_inf['class']}      e
+                 {$where}
                  ORDER BY e.{$entity_inf['property']}"
              )
             ->setParameter('parameter', $parameter )
             ->setMaxResults($maxRows)
             ->getScalarResult();
 
-        $res = array();
-        foreach ($results AS $r){
-            $res[] = $r[$entity_inf['property']];
+        $options = array();
+
+        foreach ($results AS $result)
+        {
+            $options[] = $result[$entity_inf['property']];
         }
 
-        return new Response(json_encode($res));
+        return new Response(json_encode($options));
 
     }
 }

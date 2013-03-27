@@ -6,29 +6,37 @@
     {% set value_id =  form.vars.id %}
 
     <script type="text/javascript">
-        if (typeof jQuery.ui === 'undefined'){
-            $.getScript('{{ asset('/bundles/shtumiuseful/js/jqueryui/jquery-ui-1.8.18.custom.min.js') }}');
+        if (typeof jQuery.ui === 'undefined')
+        {
+            jQuery.getScript('{{ asset('/bundles/shtumiuseful/js/jqueryui/jquery-ui-1.10.1.custom.min.js') }}');
         }
 
     </script>
 
     <script>
-        $(function() {
-            $("#{{ value_id }}").autocomplete({
-                source: function( request, response ) {
-                    $.ajax({
-                        url: "{{ path('shtumi_ajaxautocomplete') }}",
-                        dataType: "json",
-                        data: {
+        jQuery(function()
+        {
+            $("#{{ value_id }}").autocomplete(
+            {
+                source: function(request, response)
+                {
+                    jQuery.ajax(
+                    {
+                        url: '{{ path('shtumi_ajaxautocomplete') }}',
+                        dataType: 'json',
+                        data:
+                        {
                             maxRows: 12,
-                            letters: $("#{{ value_id }}").val(),
+                            letters: $('#{{ value_id }}').val(),
                         {% if type_id is defined %}
-                            type: $("#{{ type_id }}").val(),
+                            type: $('#{{ type_id }}').val(),
                         {% endif %}
-                            entity_alias: "{{ entity_alias }}"
+                            entity_alias: '{{ entity_alias }}'
                         },
-                        success: function( data ) {
-                            response( $.map( data, function( item ) {
+                        success: function(data)
+                        {
+                            response(jQuery.map(data, function(item)
+                            {
                                 return {
                                     label: item,
                                     value: item
@@ -38,25 +46,28 @@
                     });
                 },
                 minLength: 2,
-                open: function() {
-                    $(this).removeClass( "ui-corner-all" ).addClass( "ui-corner-top" );
+                open: function()
+                {
+                    jQuery(this).removeClass('ui-corner-all').addClass('ui-corner-top');
                 },
-                close: function() {
-                    $(this).removeClass( "ui-corner-top" ).addClass( "ui-corner-all" );
+                close: function()
+                {
+                    jQuery(this).removeClass('ui-corner-top').addClass('ui-corner-all');
                 }
             });
 
         {% if type_id is defined %}
-            $("#{{ type_id }}").change(function()
+            $('#{{ type_id }}').change(function()
             {
-                $("#{{ value_id }}").autocomplete( "search");
+                $('#{{ value_id }}').autocomplete('search');
             });
         {% endif %}
         });
     </script>
 
     <style>
-        .ui-autocomplete {
+        .ui-autocomplete
+        {
             max-height: 100px;
             overflow-y: auto;
             /* prevent horizontal scrollbar */
@@ -67,7 +78,8 @@
             /* IE 6 doesn't support max-height
            * we use height instead, but this forces the menu to always be this tall
            */
-        * html .ui-autocomplete {
+        * html .ui-autocomplete
+        {
             height: 100px;
         }
     </style>
@@ -87,7 +99,7 @@
     <img src="{{ asset('bundles/shtumiuseful/images/ajax-loader.gif' ) }}" id="{{ select_id }}_loader" class="hide" />
 
     <script type="text/javascript">
-        $(document).ready(function()
+        jQuery(document).ready(function()
         {
             var parent_list = {};
 
@@ -107,7 +119,7 @@
                 },
                 update_values   = function()
                 {
-                    $.each(parent_list, function(field, parent)
+                    jQuery.each(parent_list, function(field, parent)
                     {
                         if (parent.hasClass('loading'))
                         {
@@ -131,7 +143,7 @@
                     loader.show();
                     select.addClass('loading');
 
-                    $.ajax(
+                    jQuery.ajax(
                     {
                         type: 'POST',
                         data: values,
@@ -144,9 +156,9 @@
 
                                 select.find('option').each(function()
                                 {
-                                    if ($(this).val()|0 === selected)
+                                    if (jQuery(this).val()|0 === selected)
                                     {
-                                        $(this).attr('selected', 'selected');
+                                        jQuery(this).attr('selected', 'selected');
                                     }
                                 });
 
@@ -162,18 +174,18 @@
                         },
                         error: function(xhr, ajaxOptions, thrownError)
                         {
-                            $('html').html(xhr.responseText);
+                            jQuery('html').html(xhr.responseText);
                         }
                     });
                 };
 
-                $.each(parent_list, function(field, parent)
+                jQuery.each(parent_list, function(field, parent)
                 {
                     parent.change(filter);
                 });
 
                 filter();
-        });
+            });
     </script>
 
 {% endblock %}
@@ -184,10 +196,12 @@
     <script type="text/javascript" src="{{ asset('bundles/shtumiuseful/js/daterangepicker/daterangepicker.js') }}"></script>
     <script type="text/javascript" src="{{ asset('bundles/shtumiuseful/js/daterangepicker/date.js') }}"></script>
 
+    <input {{ block('widget_attributes') }} value="{{ value }}" class="shtumi-daterange">
+
     <script>
-        $(function()
+        jQuery(function()
         {
-            $('input#{{ form.vars.id }}').daterangepicker(
+            jQuery('input#{{ form.vars.id }}').daterangepicker(
             {
                 opens: 'left',
                 format: '{{ form.vars.datepicker_date_format }}',
