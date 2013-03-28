@@ -109,7 +109,7 @@
             parent_list['{{ field }}'] = $('#{{ parent_id }}');
         {% endfor %}
 
-            var selected        = '{{ value ? value : 0 }}'|0,
+            var selected        = '{{ value ? value : 0 }}',
                 select          = $('#{{ select_id }}'),
                 loader          = $('#{{ select_id }}_loader'),
                 values          =
@@ -156,12 +156,12 @@
 
                                 select.find('option').each(function()
                                 {
-                                    if (jQuery(this).val()|0 === selected)
+                                    if (jQuery(this).val() === selected)
                                     {
                                         jQuery(this).attr('selected', 'selected');
+                                        return false;
                                     }
                                 });
-
                             }
                             else
                             {
